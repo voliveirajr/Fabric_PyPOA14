@@ -9,7 +9,9 @@ def create_vm():
     with cd("%s/Fabric_PyPOA14"%(WORKSPACE_HOME)):
         local('vagrant up')
 
+@task
 def vagrant():
+    '''create a VM on virtualbox and set the user, host and ssh key file''' 
     create_vm()
     env.user = 'vagrant'
     env.hosts = ['127.0.0.1:2222']    
@@ -26,7 +28,9 @@ def reqs():
     sudo('apt-get install -y python-pip')
     sudo('yes | pip install virtualenv')
 
+@task
 def deploy():
+    '''install requirements, clone from git, loads venv and start django server'''
     reqs()
     run("git clone %s"%(GIT_URL))
     create_venv()
@@ -34,9 +38,9 @@ def deploy():
 
 def django_run():
     print(green("Running Django"))
-    with cd("./Fabric_PyPOA14"):
-        run('python manage.py syncdb')
-        run('source ./bin/activate;python manage.py runserver 0.0.0.0:8000')
+    with cd("./Fabric_PyPOA14"), prefix("source ./bin/activate"):
+        run('python manage.py syncdb --noinput')
+        run('python manage.py runserver 0.0.0.0:8000')
     
 def create_venv():
     print(green("Loading virtualenv"))
